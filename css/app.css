@@ -1,86 +1,15 @@
 @font-face {
-  font-family: 'minecraft';
-  src: url('../font/minecraft-webfont.woff2') format('woff2'),
-       url('../font/minecraft-webfont.woff') format('woff');
+  font-family: 'aldrich';
+  src: url('../font/aldrich-regular-webfont.woff2') format('woff2'),
+       url('../font/aldrich-regular-webfont.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
 body {
-  font-family: 'minecraft', sans-serif;
+  font-family: 'aldrich', sans-serif;
   font-size: 16px;
   background: #000;
   color: #fff;
   letter-spacing: 0.1rem;
-}
-
-.header,
-.timetable {
-  position: absolute;
-  left: 0;
-  width: 100%;
-}
-.header {
-  top: 0;
-  height: 80px;
-}
-.timetable {
-  bottom: 0;
-  height: calc(100% - 80px);
-}
-
-.header-title,
-.header-select {
-  position: absolute;
-  top: 0;
-  height: 80px;
-  line-height: 80px;
-  box-sizing: border-box;
-}
-
-.header-title {
-  left: 0;
-  padding-left: 1rem;
-}
-.header-title h1 {
-  margin: 0;
-  font-size: 4vmin;
-  letter-spacing: 0.2rem;
-}
-.active-count {
-  /* animation: blink 1.5s linear infinite; */
-}
-
-.header-select {
-  right: 0;
-  padding-right: 1rem;
-}
-.header-select label {
-
-}
-.header-select select {
-
-}
-
-
-.timetable-labels {
-  display: flex;
-  text-align: center;
-}
-.timetable-labels .label {
-  flex-grow: 1;
-  box-sizing: border-box;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  color: #555;
-}
-.timetable-labels .label.active {
-  color: #fff;
-}
-.timetable-graphics {
-
 }
