@@ -73,9 +73,12 @@ body {
 }
 .knob-listener {
   background: none;
-  cursor: -moz-grab;
+}
+.knob-listener:hover {
+  /* cursor: -moz-grab;
   cursor: -webkit-grab;
-  cursor: grab;
+  cursor: grab; */
+  cursor: move;
 }
 .switch {
   width: 7.496%;
@@ -83,6 +86,11 @@ body {
   top: 78.373%;
   left: 61.324%;
   background-image: url(../img/switch.png);
+  transform: rotate(5deg);
+  transition: transform 0.5s ease-in-out;
+}
+.switch.switched {
+  transform: rotate(-20deg);
 }
 
 .text-container {

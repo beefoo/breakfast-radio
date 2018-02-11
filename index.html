@@ -16,12 +16,12 @@
 
     <div class="radio-container">
       <div class="slider">
-        <div class="bar" style="left: 50%"></div>
+        <div id="bar" class="bar" style="left: 0"></div>
       </div>
-      <div class="knob"></div>
+      <div id="knob" class="knob"></div>
       <div class="radio"></div>
-      <a href="#switch" class="switch"></a>
-      <a href="#rotate" class="knob-listener"></a>
+      <a href="#switch" id="switch" class="switch"></a>
+      <a href="#rotate" id="knob-listener" class="knob-listener"></a>
     </div>
 
     <div class="text-container">
@@ -36,7 +36,7 @@
   </div>
 
   <script src="js/vendor/jquery-3.3.1.slim.min.js"></script>
-  <script src="js/vendor/hammer.min.js"></script>
+  <script src="js/vendor/zingtouch.min.js"></script>
   <script src="js/vendor/pizzicato.min.js"></script>
 
   <script src="js/config.js"></script>
