@@ -3,7 +3,8 @@
 var App = (function() {
   function App(options) {
     var defaults = {
-      "audioDir": "audio/"
+      "audioDir": "audio/",
+      "knobSensitivity": 0.5 // higher = more sensitive
     };
     this.opt = $.extend({}, defaults, options);
     this.init();
@@ -30,6 +31,7 @@ var App = (function() {
 
   App.prototype.loadKnobListener = function(knobListenerId, callback){
     var _this = this;
+    var knobSensitivity = this.opt.knobSensitivity;
 
     // listen to knob
     var $knobListener = $(knobListenerId);
@@ -38,7 +40,7 @@ var App = (function() {
     var knobRegion = new ZingTouch.Region(knobListener);
     var knobAngle = parseFloat($knobListener.attr("data-angle"));
     var onKnobRotate = function(e){
-      knobAngle += e.detail.distanceFromLast;
+      knobAngle += e.detail.distanceFromLast * knobSensitivity;
       knobAngle = clamp(knobAngle, 0, 360);
       callback(knobAngle/360.0);
     };
