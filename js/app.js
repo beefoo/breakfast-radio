@@ -20,53 +20,56 @@ var App = (function() {
 
     this.files = MANIFEST.slice(0);
 
-    this.$knob = $("#knob");
-    this.$knobListener = $("#knob-listener");
-    this.$switch = $("#switch");
-    this.$bar = $("#bar");
-
-    this.knobAngle = 0;
-    this.timeMode = true;
+    this.$knobTime = $("#knob-time");
+    this.$knobPlace = $("#knob-place");
+    this.$barTime = $("#bar-time");
+    this.$barPlace = $("#bar-place");
 
     this.loadListeners();
   };
 
-  App.prototype.loadListeners = function(){
+  App.prototype.loadKnobListener = function(knobListenerId, callback){
     var _this = this;
 
     // listen to knob
-    var $knobListener = this.$knobListener;
+    var $knobListener = $(knobListenerId);
+    var $knob = $($knobListener.attr("data-target"));
     var knobListener = $knobListener[0];
     var knobRegion = new ZingTouch.Region(knobListener);
+    var knobAngle = parseFloat($knobListener.attr("data-angle"));
     var onKnobRotate = function(e){
-      _this.onKnobRotate(e.detail.distanceFromLast);
+      knobAngle += e.detail.distanceFromLast;
+      knobAngle = clamp(knobAngle, 0, 360);
+      callback(knobAngle/360.0);
     };
     knobRegion.bind(knobListener, 'rotate', onKnobRotate);
+  };
 
-    var onSwitchClick = function(e){
-      _this.onSwitchClick();
+  App.prototype.loadListeners = function(){
+    var _this = this;
+    var onTimeChange = function(percent){
+      _this.onTimeChange(percent);
     };
-    this.$switch.on('click', onSwitchClick);
+    var onPlaceChange = function(percent){
+      _this.onPlaceChange(percent);
+    };
+
+    this.loadKnobListener("#knob-time-listener", onTimeChange);
+    this.loadKnobListener("#knob-place-listener", onPlaceChange);
   };
 
-  App.prototype.onKnobRotate = function(angleDelta){
-    // update knob UI
-    var knobAngle = this.knobAngle + angleDelta;
-    knobAngle = clamp(knobAngle, 0, 360);
-    this.$knob.css('transform', 'rotate(' + knobAngle + 'deg)');
-
+  App.prototype.onTimeChange = function(percent){
+    // update knob ui
+    this.$knobTime.css('transform', 'rotate(' + (percent*360) + 'deg)');
     // update slider bar ui
-    var percent = knobAngle / 360.0;
-    this.$bar.css('left', (percent*100) + '%');
-
-    this.knobAngle = knobAngle;
+    this.$barTime.css('left', (percent*100) + '%');
   };
 
-  App.prototype.onSwitchClick = function(){
-    var $switch = this.$switch;
-
-    $switch.toggleClass('switched');
-    this.timeMode = !$switch.hasClass("switched");
+  App.prototype.onPlaceChange = function(percent){
+    // update knob ui
+    this.$knobPlace.css('transform', 'rotate(' + (percent*360) + 'deg)');
+    // update slider bar ui
+    this.$barPlace.css('left', (percent*100) + '%');
   };
 
   App.prototype.render = function(){

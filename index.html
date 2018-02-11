@@ -15,13 +15,21 @@
   <div id="app" class="app">
 
     <div class="radio-container">
-      <div class="slider">
-        <div id="bar" class="bar" style="left: 0"></div>
+      <div class="slider time">
+        <div id="bar-time" class="bar" style="left: 50%"></div>
       </div>
-      <div id="knob" class="knob"></div>
+      <div class="slider place">
+        <div id="bar-place" class="bar" style="left: 30.435%"></div>
+      </div>
+      <div id="knob-time" class="knob time" style="transform: rotate(180deg);"></div>
+      <div id="knob-place" class="knob place" style="transform: rotate(109.566deg);"></div>
       <div class="radio"></div>
-      <a href="#switch" id="switch" class="switch"></a>
-      <a href="#rotate" id="knob-listener" class="knob-listener"></a>
+      <a href="#change-time" id="knob-time-listener" data-angle="180" class="knob-listener time">
+        <span class="hidden">Rotate this knob to change time</span>
+      </a>
+      <a href="#change-place" id="knob-place-listener" data-angle="109.566" class="knob-listener place">
+        <span class="hidden">Rotate this knob to change place</span>
+      </a>
     </div>
 
     <div class="text-container">
