@@ -9,7 +9,93 @@
 body {
   font-family: 'aldrich', sans-serif;
   font-size: 16px;
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #111;
   letter-spacing: 0.1rem;
+}
+
+.app {
+  overflow: hidden;
+}
+
+.radio-container,
+.text-container {
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  width: 50vw;
+}
+
+.radio-container {
+  left: 0;
+  height: 38.72vw;
+  top: 50%;
+  margin-top: -19.36vw;
+  background: #232325;
+}
+.slider,
+.bar,
+.knob,
+.radio,
+.switch,
+.knob-listener {
+  background: 0 0 no-repeat;
+  background-size: cover;
+  position: absolute;
+  display: block;
+  transform-origin: 50% 50%;
+}
+.radio {
+  width: 100%;
+  height: 100%;
+  background-image: url(../img/radio.png);
+}
+.slider {
+  width: 35.247%;
+  height: 10.299%;
+  top: 47.88%;
+  left: 56.539%;
+}
+.slider .bar {
+  background-image: url(../img/bar.png);
+  width: 4.072%;
+  height: 100%;
+  top: 0;
+  margin-left: -2.036%;
+}
+.knob,
+.knob-listener {
+  width: 19.13876%;
+  height: 24.71679%;
+  top: 68.28%;
+  left: 74.8%;
+  background-image: url(../img/knob.png);
+}
+.knob-listener {
+  background: none;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+.switch {
+  width: 7.496%;
+  height: 10.299%;
+  top: 78.373%;
+  left: 61.324%;
+  background-image: url(../img/switch.png);
+}
+
+.text-container {
+  right: 0;
+  box-sizing: border-box;
+  padding: 3rem;
+  display:flex;
+  align-items: center;
+}
+.text-container h1 {
+  margin-top: 2rem;
+}
+.text-container p {
+  font-size: 1.6rem;
+  line-height: 1.2;
 }
