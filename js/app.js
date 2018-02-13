@@ -27,6 +27,7 @@ var App = (function() {
     this.$barPlace = $("#bar-place");
 
     this.loadListeners();
+    this.loadRadio();
   };
 
   App.prototype.loadKnobListener = function(knobListenerId, callback){
@@ -58,6 +59,10 @@ var App = (function() {
 
     this.loadKnobListener("#knob-time-listener", onTimeChange);
     this.loadKnobListener("#knob-place-listener", onPlaceChange);
+  };
+
+  App.prototype.loadRadio = function(){
+    this.radio = new Radio();
   };
 
   App.prototype.onTimeChange = function(percent){
