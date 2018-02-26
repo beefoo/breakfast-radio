@@ -32,6 +32,8 @@ for i, f in enumerate(files):
     if ampm == "PM":
         hour += 12
     files[i]["zone"] = int(f["zone"])
+    files[i]["lat"] = float(f["lat"])
+    files[i]["lon"] = float(f["lon"])
     files[i]["hour"] = hour
     files[i]["minute"] = minute
     files[i]["duration"] = duration

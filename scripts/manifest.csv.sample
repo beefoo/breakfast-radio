@@ -1,4 +1,4 @@
-filename,time,zone
-a.mp3,11:27 AM,-5
-b.mp3,10:36 AM,-5
-c.mp3,8:05 AM,-5
+filename,time,zone,lat,lon
+a.mp3,11:27 AM,8,22.3529913,113.9876136
+b.mp3,10:36 AM,-5,40.9327435,-74.0353921
+c.mp3,8:05 AM,1,48.4236722,2.6116906
