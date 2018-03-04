@@ -1,5 +1,9 @@
 var CONFIG = {
-  "audioDir": "audio/"
+  "radio": {
+    "audioDir": "audio/",
+    "minTime": 0,
+    "maxTime": 43200 // noon = 12 * 60 * 60 = 43200
+  }
 };
 
 var TIMEZONES = [
@@ -12,6 +16,7 @@ var TIMEZONES = [
   "Eastern Standard Time (GMT-5:00)",
   "Puerto Rico and US Virgin Islands Time (GMT-4:00)",
   "Brazil Eastern Time (GMT-3:00)",
+  "Fernando de Noronha Time (GMT-2:00)",
   "Central African Time (GMT-1:00)",
   "Greenwich Mean Time (GMT)",
   "European Central Time (GMT+1:00)",

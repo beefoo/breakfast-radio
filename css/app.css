@@ -9,8 +9,8 @@
 body {
   font-family: 'aldrich', sans-serif;
   font-size: 16px;
-  background: #fff;
-  color: #111;
+  background: #3f1126;
+  color: #fff;
   letter-spacing: 0.1rem;
 }
 
@@ -31,7 +31,6 @@ body {
   height: 38.72vw;
   top: 50%;
   margin-top: -19.36vw;
-  background: #232325;
   overflow: hidden;
 }
 .slider,
@@ -56,6 +55,7 @@ body {
   height: 5.1495%;
   top: 47.88%;
   left: 56.539%;
+  background: #232325;
 }
 .slider.place {
   top: 53.0295%;
@@ -97,11 +97,53 @@ body {
   align-items: center;
 }
 .text-container h1 {
-  margin-top: 2rem;
+  margin-top: 0;
+  padding-top: 3rem;
 }
 .text-container p {
   font-size: 1.6rem;
-  line-height: 1.2;
+  line-height: 1.5;
+}
+.info {
+  display: block;
+  width: 90%;
+  height: 5vmin;
+  padding: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  background: #561e37;
+}
+.info:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.info .signal {
+  width: 5vmin;
+  height: 5vmin;
+  background: #00ff60;
+  border-radius: 2.5vmin;
+  float: left;
+  position: relative;
+}
+.info .signal-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0.6;
+  border-radius: 50%;
+}
+.info .label {
+  margin-left: 7vmin;
+  width: auto;
+  height: 5vmin;
+}
+.info .label p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hidden {
   position:absolute;
@@ -110,4 +152,25 @@ body {
   width:1px;
   height:1px;
   overflow:hidden;
+}
+
+@media (max-width: 1000px) {
+  .radio-container,
+  .text-container {
+    position: relative;
+    height: 69.6889952153vw;
+    width: 90vw;
+  }
+  .radio-container {
+    left: auto;
+    top: auto;
+    margin: 2rem auto;
+  }
+  .text-container {
+    display: block;
+    margin: 0 auto;
+    padding-top: 1rem;
+    overflow: visible;
+    height: auto;
+  }
 }

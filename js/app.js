@@ -10,12 +10,6 @@ var App = (function() {
     this.init();
   }
 
-  function clamp(value, lower, upper) {
-    if (value > upper) value = upper;
-    if (value < lower) value = lower;
-    return value;
-  }
-
   App.prototype.init = function(){
     var _this = this;
 
@@ -62,14 +56,7 @@ var App = (function() {
   };
 
   App.prototype.loadRadio = function(){
-    this.radio = new Radio();
-  };
-
-  App.prototype.onTimeChange = function(percent){
-    // update knob ui
-    this.$knobTime.css('transform', 'rotate(' + (percent*360) + 'deg)');
-    // update slider bar ui
-    this.$barTime.css('left', (percent*100) + '%');
+    this.radio = new Radio(this.opt.radio);
   };
 
   App.prototype.onPlaceChange = function(percent){
@@ -77,6 +64,17 @@ var App = (function() {
     this.$knobPlace.css('transform', 'rotate(' + (percent*360) + 'deg)');
     // update slider bar ui
     this.$barPlace.css('left', (percent*100) + '%');
+    // update radio sound
+    this.radio.updatePlace(percent);
+  };
+
+  App.prototype.onTimeChange = function(percent){
+    // update knob ui
+    this.$knobTime.css('transform', 'rotate(' + (percent*360) + 'deg)');
+    // update slider bar ui
+    this.$barTime.css('left', (percent*100) + '%');
+    // update radio sound
+    this.radio.updateTime(percent);
   };
 
   App.prototype.render = function(){
