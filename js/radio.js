@@ -13,6 +13,10 @@ var Radio = (function() {
     this.data = this.parseData(MANIFEST);
     // console.log(this.data);
 
+    this.$station = $("#station");
+    this.$stationLabel = $("#station-label");
+    this.$stationSignal = $("#signal-status");
+
     this.time = this.opt.startTime;
     this.place = this.opt.startPlace;
 
@@ -127,10 +131,28 @@ var Radio = (function() {
 
   Radio.prototype.updateUI = function(person){
     var prev = this.person;
-    var changed = (prev && person && person.index !== prev.index);
+    var changed = (!prev && person || prev && !person || prev && person && person.index !== prev.index);
+
+    var zone = parseInt(Math.round(this.place * 23)) - 11;
+    if (zone >= 0) zone = "+" + zone;
+    var timezone = "GMT"+zone+":00";
+    var time = lerp(this.opt.minTime, this.opt.maxTime, this.time);
+    var hour = parseInt(Math.floor(time / 60 / 60));
+    var minute = parseInt(Math.floor(time / 60) - hour * 60);
+
+    this.$station.text(pad(hour, 2) + ":" + pad(minute, 2) + " (" + timezone + ")")
+
     if (changed && person) {
-      console.log('Playing '+person.label+' with signal '+person.signal);
+      this.$stationLabel.text(person.label);
+
+    } else if (changed) {
+      this.$stationLabel.text("No signal");
     }
+
+    if (person) {
+      this.$stationSignal.css('opacity', person.signal);
+    }
+
     this.person = person;
   };
 

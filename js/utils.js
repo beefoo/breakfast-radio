@@ -11,3 +11,9 @@ function lerp(a, b, percent) {
 function norm(value, a, b) {
   return (1.0 * value - a) / (b - a);
 }
+
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
