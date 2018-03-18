@@ -14,8 +14,9 @@ var Radio = (function() {
     // console.log(this.data);
 
     this.$station = $("#station");
-    this.$stationLabel = $("#station-label");
     this.$stationSignal = $("#signal-status");
+    this.$stationMarquee = $("#station-label");
+    this.$stationMarqueeText = $(".station-label-text");
 
     this.time = this.opt.startTime;
     this.place = this.opt.startPlace;
@@ -143,10 +144,12 @@ var Radio = (function() {
     this.$station.text(pad(hour, 2) + ":" + pad(minute, 2) + " (" + timezone + ")")
 
     if (changed && person) {
-      this.$stationLabel.text(person.label);
+      this.$stationMarqueeText.text("Now playing: "+person.label);
+      if (!prev) this.$stationMarquee.addClass("active");
 
     } else if (changed) {
-      this.$stationLabel.text("No signal");
+      this.$stationMarqueeText.text("No signal");
+      this.$stationMarquee.removeClass("active");
     }
 
     if (person) {

@@ -154,6 +154,42 @@ body {
   overflow:hidden;
 }
 
+.station-marquee {
+  position: relative;
+  overflow: hidden;
+  height: 2rem;
+  line-height: 2rem;
+}
+.station-marquee > div {
+  display: block;
+  width: 200%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  opacity: 0.5;
+}
+.station-marquee.active > div {
+  animation: marquee 8s linear infinite;
+  opacity: 1;
+}
+.station-marquee > div:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.station-marquee span {
+  float: left;
+  width: 50%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@keyframes marquee {
+  0% { left: 0; }
+  100% { left: -100%; }
+}
+
 @media (max-width: 1000px) {
   .radio-container,
   .text-container {
