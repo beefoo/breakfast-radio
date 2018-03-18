@@ -2,10 +2,7 @@
 
 var App = (function() {
   function App(options) {
-    var defaults = {
-      "audioDir": "audio/",
-      "knobSensitivity": 0.5 // higher = more sensitive
-    };
+    var defaults = {};
     this.opt = $.extend({}, defaults, options);
     this.init();
   }
@@ -13,15 +10,19 @@ var App = (function() {
   App.prototype.init = function(){
     var _this = this;
 
-    this.files = MANIFEST.slice(0);
+    this.time = this.opt.startTime;
+    this.place = this.opt.startPlace;
+    this.timeStep = 1.0 / (this.opt.maxTime - this.opt.minTime);
+    this.lastUpdated = new Date();
 
-    this.$knobTime = $("#knob-time");
-    this.$knobPlace = $("#knob-place");
-    this.$barTime = $("#bar-time");
-    this.$barPlace = $("#bar-place");
+    this.data = this.parseData(MANIFEST.slice(0));
 
-    this.loadRadio();
+    this.ui = new UI({});
+    this.audio = new Audio({});
+
     this.loadListeners();
+
+    this.render();
   };
 
   App.prototype.loadKnobListener = function(knobListenerId, callback, startValue){
@@ -55,30 +56,119 @@ var App = (function() {
     this.loadKnobListener("#knob-place-listener", onPlaceChange, this.opt.startPlace);
   };
 
-  App.prototype.loadRadio = function(){
-    this.radio = new Radio(_.extend({}, this.opt.radio, {startTime: this.opt.startTime, startPlace: this.opt.startPlace }));
-  };
-
   App.prototype.onPlaceChange = function(percent){
-    // update knob ui
-    this.$knobPlace.css('transform', 'rotate(' + (percent*360) + 'deg)');
-    // update slider bar ui
-    this.$barPlace.css('left', (percent*100) + '%');
-    // update radio sound
-    this.radio.updatePlace(percent);
+    this.place = percent;
+    this.update();
   };
 
   App.prototype.onTimeChange = function(percent){
-    // update knob ui
-    this.$knobTime.css('transform', 'rotate(' + (percent*360) + 'deg)');
-    // update slider bar ui
-    this.$barTime.css('left', (percent*100) + '%');
-    // update radio sound
-    this.radio.updateTime(percent);
+    this.time = percent;
+    this.update();
+  };
+
+  App.prototype.parseData = function(data){
+    var audioDir = this.opt.audioDir;
+    var minTime = this.opt.minTime;
+    var maxTime = this.opt.maxTime;
+    var timePad = this.opt.timePad;
+    var placePad = this.opt.placePad;
+
+    var parsedData = _.map(data, function(obj, i){
+      var d = _.clone(obj);
+      d.index = i;
+      d.timeStart = d.hour * 60 * 60 + d.minute * 60;
+      d.timeEnd = d.timeStart + d.duration;
+      if (d.timeEnd > maxTime) {
+        d.timeEnd = maxTime;
+        d.timeStart = maxTime - d.duration;
+      }
+      d.timeStartNormal = norm(d.timeStart, minTime, maxTime);
+      d.timeEndNormal = norm(d.timeEnd, minTime, maxTime);
+      d.timeSignalStartNormal = norm(d.timeStart-timePad, minTime, maxTime);
+      d.timeSignalEndNormal = norm(d.timeEnd+timePad, minTime, maxTime);
+
+      var zone = d.zone+11;
+      d.timezone = TIMEZONES[zone];
+      d.placeNormal = norm(d.lon, -180.0, 180.0);
+      d.placeSignalStartNormal = norm(d.lon-placePad, -180.0, 180.0);
+      d.placeSignalEndNormal = norm(d.lon+placePad, -180.0, 180.0);
+
+      d.filename = audioDir + d.filename;
+
+      return d;
+    });
+
+    return parsedData;
   };
 
   App.prototype.render = function(){
+    // var _this = this;
+    //
+    // // increment time
+    // var now = new Date();
+    // var deltaSeconds = Math.floor((now - this.lastUpdated) / 1000);
+    // var deltaPercent = deltaSeconds * this.timeStep;
+    // var newTime = clamp(this.time + deltaPercent, 0, 1);
+    //
+    // this.ui.render();
+    // this.audio.render();
+    //
+    // requestAnimationFrame(function(){ _this.render(); });
+  };
 
+  App.prototype.update = function(){
+    var place = this.place;
+    var time = this.time;
+    var match = false;
+
+    var matches = _.filter(this.data, function(d){
+      return (time >= d.timeSignalStartNormal && time <= d.timeSignalEndNormal && place >= d.placeSignalStartNormal && place < d.placeSignalEndNormal);
+    });
+
+    // add signal strength
+    // signal strength of 1 = place and time are exactly in the center of audio track
+    // signal strength of 0 = place and time are at the very edges of audio track
+    matches = _.map(matches, function(m){
+      var d = _.clone(m);
+      var timeSignal = 1.0 - Math.abs((norm(time, d.timeSignalStartNormal, d.timeSignalEndNormal) * 2) - 1);
+      var placeSignal = 1.0 - Math.abs((norm(place, d.placeSignalStartNormal, d.placeSignalEndNormal) * 2) - 1);
+      d.signal = (timeSignal + placeSignal) * 0.5;
+      return d;
+    });
+
+    // more than one matched, take the one with the strongest signal
+    if (matches.length > 1) {
+      var sorted = _.sortBy(matches, function(d){ return 1.0 - d.signal; });
+      match = sorted[0];
+
+    // only one matched
+    } else if (matches.length > 0) {
+      match = matches[0];
+    }
+
+    // check to see if the person is changed
+    var prev = this.currentPerson;
+    var changed = (!prev && match || prev && !match || prev && match && match.index !== prev.index);
+    if (changed) this.ui.updatePerson(match);
+    this.currentPerson = match;
+
+    // check to see if minute has changed
+    var time = lerp(this.opt.minTime, this.opt.maxTime, time);
+    var minutes = parseInt(Math.floor(time / 60));
+    prev = this.currentMinutes;
+    var changed = (!prev || prev && minutes !== prev);
+    if (changed) this.ui.updateTime(minutes);
+    this.currentMinutes = minutes;
+
+    // check to see if zone has changed
+    var zone = parseInt(Math.round(place * 23)) - 11;
+    prev = this.currentZone;
+    var changed = (!prev || prev && zone !== prev);
+    if (changed) this.ui.updateZone(zone);
+    this.currentZone = zone;
+
+    // update the knobs always
+    this.ui.update(this.time, this.place);
   };
 
   return App;

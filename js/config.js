@@ -1,13 +1,12 @@
 var CONFIG = {
+  "knobSensitivity": 0.5, // higher = more sensitive
   "startTime": 0.75, // 9 a.m
   "startPlace": 0.25, // nyc
-  "radio": {
-    "audioDir": "audio/",
-    "minTime": 0,
-    "maxTime": 43200, // noon = 12 * 60 * 60 = 43200
-    "timePad": 60 * 60, // in seconds
-    "placePad": 30 // in degrees longitude (15 deg per timezone)
-  }
+  "audioDir": "audio/",
+  "minTime": 0,
+  "maxTime": 43200, // noon = 12 * 60 * 60 = 43200
+  "timePad": 60 * 60, // in seconds
+  "placePad": 30 // in degrees longitude (15 deg per timezone)
 };
 
 var TIMEZONES = [
