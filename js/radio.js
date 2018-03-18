@@ -11,9 +11,10 @@ var Radio = (function() {
     var _this = this;
 
     this.data = this.parseData(MANIFEST);
+    // console.log(this.data);
 
-    this.time = this.opt.time;
-    this.place = this.opt.place;
+    this.time = this.opt.startTime;
+    this.place = this.opt.startPlace;
 
     this.loadStatic();
   };
@@ -38,9 +39,12 @@ var Radio = (function() {
     var audioDir = this.opt.audioDir;
     var minTime = this.opt.minTime;
     var maxTime = this.opt.maxTime;
+    var timePad = this.opt.timePad;
+    var placePad = this.opt.placePad;
 
-    var parsedData = _.each(data, function(obj, i){
+    var parsedData = _.map(data, function(obj, i){
       var d = _.clone(obj);
+      d.index = i;
       d.timeStart = d.hour * 60 * 60 + d.minute * 60;
       d.timeEnd = d.timeStart + d.duration;
       if (d.timeEnd > maxTime) {
@@ -49,9 +53,14 @@ var Radio = (function() {
       }
       d.timeStartNormal = norm(d.timeStart, minTime, maxTime);
       d.timeEndNormal = norm(d.timeEnd, minTime, maxTime);
-      d.timezone = TIMEZONES[d.zone+11];
-      d.placeStartNormal = d.zone+11 / 24.0;
-      d.placeEndNormal = d.placeStartNormal + 1.0 / 24.0;
+      d.timeSignalStartNormal = norm(d.timeStart-timePad, minTime, maxTime);
+      d.timeSignalEndNormal = norm(d.timeEnd+timePad, minTime, maxTime);
+
+      var zone = d.zone+11;
+      d.timezone = TIMEZONES[zone];
+      d.placeNormal = norm(d.lon, -180.0, 180.0);
+      d.placeSignalStartNormal = norm(d.lon-placePad, -180.0, 180.0);
+      d.placeSignalEndNormal = norm(d.lon+placePad, -180.0, 180.0);
       return d;
     });
 
@@ -72,11 +81,24 @@ var Radio = (function() {
     var match = false;
 
     var matches = _.filter(this.data, function(d){
-      return (time >= d.timeStartNormal && time <= d.timeEndNormal && place >= d.placeStartNormal && place < d.placeEndNormal);
+      return (time >= d.timeSignalStartNormal && time <= d.timeSignalEndNormal && place >= d.placeSignalStartNormal && place < d.placeSignalEndNormal);
     });
 
-    // more than one matched
+    // add signal strength
+    // signal strength of 1 = place and time are exactly in the center of audio track
+    // signal strength of 0 = place and time are at the very edges of audio track
+    matches = _.map(matches, function(m){
+      var d = _.clone(m);
+      var timeSignal = 1.0 - Math.abs((norm(time, d.timeSignalStartNormal, d.timeSignalEndNormal) * 2) - 1);
+      var placeSignal = 1.0 - Math.abs((norm(place, d.placeSignalStartNormal, d.placeSignalEndNormal) * 2) - 1);
+      d.signal = (timeSignal + placeSignal) * 0.5;
+      return d;
+    });
+
+    // more than one matched, take the one with the strongest signal
     if (matches.length > 1) {
+      var sorted = _.sortBy(matches, function(d){ return 1.0 - d.signal; });
+      match = sorted[0];
 
     // only one matched
     } else if (matches.length > 0) {
@@ -95,14 +117,21 @@ var Radio = (function() {
 
   Radio.prototype.updatePlace = function(percent){
     this.place = percent;
+    this.update();
   };
 
   Radio.prototype.updateTime = function(percent){
     this.time = percent;
+    this.update();
   };
 
   Radio.prototype.updateUI = function(person){
-
+    var prev = this.person;
+    var changed = (prev && person && person.index !== prev.index);
+    if (changed && person) {
+      console.log('Playing '+person.label+' with signal '+person.signal);
+    }
+    this.person = person;
   };
 
   return Radio;

@@ -20,11 +20,11 @@ var App = (function() {
     this.$barTime = $("#bar-time");
     this.$barPlace = $("#bar-place");
 
-    this.loadListeners();
     this.loadRadio();
+    this.loadListeners();
   };
 
-  App.prototype.loadKnobListener = function(knobListenerId, callback){
+  App.prototype.loadKnobListener = function(knobListenerId, callback, startValue){
     var _this = this;
     var knobSensitivity = this.opt.knobSensitivity;
 
@@ -33,13 +33,14 @@ var App = (function() {
     var $knob = $($knobListener.attr("data-target"));
     var knobListener = $knobListener[0];
     var knobRegion = new ZingTouch.Region(knobListener);
-    var knobAngle = parseFloat($knobListener.attr("data-angle"));
+    var knobAngle = startValue * 360;
     var onKnobRotate = function(e){
       knobAngle += e.detail.distanceFromLast * knobSensitivity;
       knobAngle = clamp(knobAngle, 0, 360);
       callback(knobAngle/360.0);
     };
     knobRegion.bind(knobListener, 'rotate', onKnobRotate);
+    callback(startValue);
   };
 
   App.prototype.loadListeners = function(){
@@ -50,13 +51,12 @@ var App = (function() {
     var onPlaceChange = function(percent){
       _this.onPlaceChange(percent);
     };
-
-    this.loadKnobListener("#knob-time-listener", onTimeChange);
-    this.loadKnobListener("#knob-place-listener", onPlaceChange);
+    this.loadKnobListener("#knob-time-listener", onTimeChange, this.opt.startTime);
+    this.loadKnobListener("#knob-place-listener", onPlaceChange, this.opt.startPlace);
   };
 
   App.prototype.loadRadio = function(){
-    this.radio = new Radio(this.opt.radio);
+    this.radio = new Radio(_.extend({}, this.opt.radio, {startTime: this.opt.startTime, startPlace: this.opt.startPlace }));
   };
 
   App.prototype.onPlaceChange = function(percent){
