@@ -102,21 +102,27 @@ var App = (function() {
   };
 
   App.prototype.render = function(){
-    // var _this = this;
-    //
-    // // increment time
-    // var now = new Date();
-    // var deltaSeconds = Math.floor((now - this.lastUpdated) / 1000);
-    // var deltaPercent = deltaSeconds * this.timeStep;
-    // var newTime = clamp(this.time + deltaPercent, 0, 1);
-    //
-    // this.ui.render();
-    // this.audio.render();
-    //
-    // requestAnimationFrame(function(){ _this.render(); });
+    var _this = this;
+
+    // increment time
+    var now = new Date();
+    var deltaSeconds = (now - this.lastUpdated) / 1000.0;
+    var deltaPercent = deltaSeconds * this.timeStep;
+    var newTime = clamp(this.time + deltaPercent, 0, 1);
+    this.lastUpdated = now;
+
+    this.time = newTime;
+    var timeChanged = this.updateTime();
+    if (timeChanged) {
+      this.updatePerson();
+    }
+    // update the knobs always
+    this.ui.update(this.time, this.place);
+
+    requestAnimationFrame(function(){ _this.render(); });
   };
 
-  App.prototype.update = function(){
+  App.prototype.updatePerson = function(){
     var place = this.place;
     var time = this.time;
     var match = false;
@@ -152,20 +158,43 @@ var App = (function() {
     if (changed) this.ui.updatePerson(match);
     this.currentPerson = match;
 
+    return changed;
+  };
+
+  App.prototype.updateTime = function(){
+    var time = this.time;
+
     // check to see if minute has changed
-    var time = lerp(this.opt.minTime, this.opt.maxTime, time);
-    var minutes = parseInt(Math.floor(time / 60));
-    prev = this.currentMinutes;
-    var changed = (!prev || prev && minutes !== prev);
-    if (changed) this.ui.updateTime(minutes);
-    this.currentMinutes = minutes;
+    var seconds = lerp(this.opt.minTime, this.opt.maxTime, time);
+    seconds = parseInt(Math.round(seconds));
+    var prev = this.currentTime;
+    var changed = (!prev || prev && seconds !== prev);
+    if (changed) this.ui.updateTime(seconds);
+    this.currentTime = seconds;
+
+    return changed;
+  };
+
+  App.prototype.updateZone = function(){
+    var place = this.place;
 
     // check to see if zone has changed
     var zone = parseInt(Math.round(place * 23)) - 11;
-    prev = this.currentZone;
+    var prev = this.currentZone;
     var changed = (!prev || prev && zone !== prev);
     if (changed) this.ui.updateZone(zone);
     this.currentZone = zone;
+
+    return changed;
+  };
+
+  App.prototype.update = function(){
+    var timeChanged = this.updateTime();
+    var zoneChanged = this.updateZone();
+
+    if (timeChanged || zoneChanged) {
+      var personChanged = this.updatePerson();
+    }
 
     // update the knobs always
     this.ui.update(this.time, this.place);

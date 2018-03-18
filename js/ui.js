@@ -20,15 +20,27 @@ var UI = (function() {
   };
 
   UI.prototype.update = function(time, place){
-    // update knob ui
-    this.$knobPlace.css('transform', 'rotate(' + (place*360) + 'deg)');
-    // update slider bar ui
-    this.$barPlace.css('left', (place*100) + '%');
+    var placeDegree = round(place * 360, 1);
+    var timeDegree = round(time * 360, 1);
 
-    // update knob ui
-    this.$knobTime.css('transform', 'rotate(' + (time*360) + 'deg)');
-    // update slider bar ui
-    this.$barTime.css('left', (time*100) + '%');
+    var placeChanged = this.placeDegree===undefined || this.placeDegree !== placeDegree;
+    var timeChanged = this.timeDegree===undefined || this.timeDegree !== timeDegree;
+    this.placeDegree = placeDegree;
+    this.timeDegree = timeDegree;
+
+    if (placeChanged) {
+      // update knob ui
+      this.$knobPlace.css('transform', 'rotate(' + (place*360) + 'deg)');
+      // update slider bar ui
+      this.$barPlace.css('left', (place*100) + '%');
+    }
+
+    if (timeChanged) {
+      // update knob ui
+      this.$knobTime.css('transform', 'rotate(' + (time*360) + 'deg)');
+      // update slider bar ui
+      this.$barTime.css('left', (time*100) + '%');
+    }
   };
 
   UI.prototype.updatePerson = function(person){
@@ -44,10 +56,13 @@ var UI = (function() {
     }
   };
 
-  UI.prototype.updateTime = function(minutes) {
-    var hour = parseInt(Math.floor(minutes / 60));
+  UI.prototype.updateTime = function(seconds) {
+    var hour = parseInt(Math.floor(seconds / 60 / 60));
+    var minutes = parseInt(Math.floor(seconds / 60));
+
     var minute = minutes - hour * 60;
-    this.$stationTime.text(pad(hour, 2) + ":" + pad(minute, 2));
+    var second = seconds - hour * 60 * 60 - minute * 60;
+    this.$stationTime.text(pad(hour, 2) + ":" + pad(minute, 2) + ":" + pad(second, 2));
   };
 
   UI.prototype.updateZone = function(zone) {

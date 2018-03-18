@@ -12,6 +12,10 @@ function norm(value, a, b) {
   return (1.0 * value - a) / (b - a);
 }
 
+function round(value, nearest) {
+  return +value.toFixed(nearest);
+}
+
 function pad(n, width, z) {
   z = z || '0';
   n = n + '';
