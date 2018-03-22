@@ -75,6 +75,7 @@ var App = (function() {
 
     var parsedData = _.map(data, function(obj, i){
       var d = _.clone(obj);
+      d.id = ""+i;
       d.index = i;
       d.timeStart = d.hour * 60 * 60 + d.minute * 60;
       d.timeEnd = d.timeStart + d.duration;
