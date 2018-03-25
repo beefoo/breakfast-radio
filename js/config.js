@@ -5,8 +5,8 @@ var CONFIG = {
   "audioDir": "audio/",
   "minTime": 0,
   "maxTime": 43200, // noon = 12 * 60 * 60 = 43200
-  "timePad": 60 * 60, // in seconds
-  "placePad": 30 // in degrees longitude (15 deg per timezone)
+  "timePad": 0, // in seconds
+  "placePad": 20 // in degrees longitude (15 deg per timezone)
 };
 
 var TIMEZONES = [

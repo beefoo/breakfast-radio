@@ -7,6 +7,12 @@ var App = (function() {
     this.init();
   }
 
+  function getSignal(d, time, place) {
+    var timeSignal = 1.0 - Math.abs((norm(time, d.timeSignalStartNormal, d.timeSignalEndNormal) * 2) - 1);
+    var placeSignal = 1.0 - Math.abs((norm(place, d.placeSignalStartNormal, d.placeSignalEndNormal) * 2) - 1);
+    return (timeSignal + placeSignal) * 0.5;
+  }
+
   App.prototype.init = function(){
     var _this = this;
 
@@ -137,9 +143,7 @@ var App = (function() {
     // signal strength of 0 = place and time are at the very edges of audio track
     matches = _.map(matches, function(m){
       var d = _.clone(m);
-      var timeSignal = 1.0 - Math.abs((norm(time, d.timeSignalStartNormal, d.timeSignalEndNormal) * 2) - 1);
-      var placeSignal = 1.0 - Math.abs((norm(place, d.placeSignalStartNormal, d.placeSignalEndNormal) * 2) - 1);
-      d.signal = (timeSignal + placeSignal) * 0.5;
+      d.signal = getSignal(d, time, place);
       return d;
     });
 
@@ -192,9 +196,29 @@ var App = (function() {
   App.prototype.update = function(){
     var timeChanged = this.updateTime();
     var zoneChanged = this.updateZone();
+    var personChanged = false;
 
     if (timeChanged || zoneChanged) {
-      var personChanged = this.updatePerson();
+      personChanged = this.updatePerson();
+    }
+
+    var p = this.currentPerson;
+    var position;
+    if (p) {
+      var n = norm(this.time, p.timeStartNormal, p.timeEndNormal);
+      position = p.duration * n;
+    }
+
+    if (personChanged) {
+      this.audio.updatePerson(this.currentPerson, position);
+
+    } else if (timeChanged && this.currentPerson) {
+      var signal = getSignal(this.currentPerson, this.time, this.place);
+      this.audio.updatePerson(this.currentPerson, position, signal);
+    }
+
+    if (!this.currentPerson) {
+      this.audio.updateStatic();
     }
 
     // update the knobs always

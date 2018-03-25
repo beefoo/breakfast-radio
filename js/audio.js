@@ -11,8 +11,7 @@ var Audio = (function() {
 
   Audio.prototype.init = function(){
 
-    this.audioBuffers = [];
-    this.audioBufferIds = [];
+    this.audioBuffers = {};
 
     this.loadStatic();
   };
@@ -33,55 +32,66 @@ var Audio = (function() {
     // this.radioStatic.play();
   };
 
-  Audio.prototype.playAudio = function(person){
+  Audio.prototype.pauseAudio = function(){
+    var _this = this;
+    
+    // pause current audio
+    _.each(this.audioBuffers, function(a, id){
+      if (a.loaded) {
+        a.buf.volume = 0;
+        a.buf.pause();
+      }
+      _this.audioBuffers[id].playing = false;
+    });
+  };
+
+  Audio.prototype.pauseStatic = function(){
+    this.playStatic(0);
+  };
+
+  Audio.prototype.playAudio = function(person, position, signal){
     var _this = this;
 
-    // pause current audio
-    if (this.currentBuffer) this.currentBuffer.pause();
-
-    // if no person, play random static
-    if (!person) {
-      this.playStatic(Math.random() * 0.5 + 0.5);
-      return false;
-    }
-
     // retrieve existing buffer
-    var signal = person.signal;
-    var bufferIndex = this.audioBufferIds.indexOf(person.id);
-    var audioBuffer = false;
-    var bufferLength = this.opt.bufferLength;
+    if (signal===undefined) signal = person.signal;
+    var bufferIds = _.keys(this.audioBuffers);
+    var bufferId = person.id;
+    var bufferIndex = bufferIds.indexOf(bufferId);
 
     // play audio buffer
-    var playAudioBuffer = function(buf, sig, pos){
-      buf.volume = sig;
-      buf.play(0, pos);
-      _this.currentBuffer = buf;
-      _this.playStatic(1.0 - sig);
+    var playAudioBuffer = function(a){
+      if (a.loaded && a.playing) {
+        a.buf.volume = a.signal;
+        a.buf.play(0, a.position);
+      }
     };
 
     // play existing audio buffer
     if (bufferIndex >= 0) {
-      audioBuffer = this.audioBuffers[bufferIndex];
-      playAudioBuffer(audioBuffer, signal);
+      this.audioBuffers[bufferId].playing = true;
+      this.audioBuffers[bufferId].signal = signal;
+      this.audioBuffers[bufferId].position = position;
+      playAudioBuffer(this.audioBuffers[bufferId]);
 
     // load and play new audio buffer
     } else {
-      audioBuffer = new Pizzicato.Sound(person.filename, function() {
+      var buf = new Pizzicato.Sound(person.filename, function() {
         console.log(person.filename + " loaded.");
-        // limit number of audio buffers in memory
-        if (_this.audioBufferIds.length >= bufferLength) {
-          _this.audioBufferIds.pop();
-          _this.audioBuffers.pop();
-        }
-        _this.audioBufferIds.unshift(person.id);
-        _this.audioBuffers.unshift(audioBuffer);
-        playAudioBuffer(audioBuffer, signal);
+        _this.audioBuffers[bufferId].loaded = true;
+        playAudioBuffer(_this.audioBuffers[bufferId]);
       });
+      this.audioBuffers[bufferId] = {
+        buf: buf,
+        loaded: false,
+        playing: true,
+        signal: signal,
+        position: position
+      };
     }
-
   };
 
   Audio.prototype.playStatic = function(signal){
+    if (signal === undefined) signal = Math.random() * 0.25;
     this.radioStatic.volume = signal;
     this.radioStatic.play();
   };
@@ -90,8 +100,22 @@ var Audio = (function() {
 
   };
 
-  Audio.prototype.updatePerson = function(person, position){
-    this.playAudio(person, position);
+  Audio.prototype.updatePerson = function(person, position, signal){
+    this.pauseAudio();
+
+    // if no person, play random static
+    if (!person) {
+      this.playStatic();
+
+    } else {
+      this.pauseStatic();
+      this.playAudio(person, position, signal);
+    }
+  };
+
+  Audio.prototype.updateStatic = function(){
+    this.pauseAudio();
+    this.playStatic();
   };
 
   return Audio;
