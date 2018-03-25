@@ -3,38 +3,80 @@
 var Audio = (function() {
   function Audio(options) {
     var defaults = {
-      bufferLength: 5
+      el: "#station-viz"
     };
     this.opt = $.extend({}, defaults, options);
     this.init();
   }
 
+  function getBarHeight(value, canvasHeight) {
+    var floorLevel = 0;
+  	var height = Math.max(0, (value - floorLevel));
+  	height = (height / (256 - floorLevel)) * canvasHeight;
+  	return height;
+  }
+
   Audio.prototype.init = function(){
 
+    this.$el = $(this.opt.el);
     this.audioBuffers = {};
+    this.currentBufferId = false;
 
+    this.loadAnalyzer();
     this.loadStatic();
+    this.loadViz();
+  };
+
+  Audio.prototype.loadAnalyzer = function(){
+    var analyzer = Pizzicato.context.createAnalyser();
+    analyzer.fftSize = 128;
+    var bufferLength = analyzer.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+
+    this.analyzer = analyzer;
+    this.analyzerBuf = dataArray;
+    this.analyzerBuflen = bufferLength;
   };
 
   Audio.prototype.loadStatic = function(){
     // https://noisehack.com/generate-noise-web-audio-api/
-    var radioStatic = new Pizzicato.Sound(function(e) {
-      var output = e.outputBuffer.getChannelData(0);
-      var lastOut = 0.0;
-      for (var i = 0; i < e.outputBuffer.length; i++) {
-        var white = Math.random() * 2 - 1;
-        output[i] = (lastOut + (0.02 * white)) / 1.02;
-        lastOut = output[i];
-        output[i] *= 3.5; // (roughly) compensate for gain
+    var radioStatic = new Pizzicato.Sound({
+      source: 'script',
+      options: {
+        audioFunction: function(e){
+          var output = e.outputBuffer.getChannelData(0);
+          var lastOut = 0.0;
+          for (var i = 0; i < e.outputBuffer.length; i++) {
+            var white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = output[i];
+            output[i] *= 3.5; // (roughly) compensate for gain
+          }
+        }
       }
     });
     this.radioStatic = radioStatic;
     // this.radioStatic.play();
   };
 
+  Audio.prototype.loadViz = function(){
+    var app = new PIXI.Application(this.$el.width(), this.$el.height(), {transparent: true});
+    var graphics = new PIXI.Graphics();
+    app.stage.addChild(graphics);
+
+    this.$el.append(app.view);
+
+    this.viz = app;
+    this.graphics = graphics;
+  };
+
+  Audio.prototype.onResize = function(){
+    this.viz.renderer.resize(this.$el.width(), this.$el.height());
+  };
+
   Audio.prototype.pauseAudio = function(){
     var _this = this;
-    
+
     // pause current audio
     _.each(this.audioBuffers, function(a, id){
       if (a.loaded) {
@@ -80,6 +122,7 @@ var Audio = (function() {
         _this.audioBuffers[bufferId].loaded = true;
         playAudioBuffer(_this.audioBuffers[bufferId]);
       });
+      buf.connect(this.analyzer);
       this.audioBuffers[bufferId] = {
         buf: buf,
         loaded: false,
@@ -97,7 +140,32 @@ var Audio = (function() {
   };
 
   Audio.prototype.render = function(){
+    var graphics = this.graphics;
+    graphics.clear();
 
+    if (!this.currentBufferId) return false;
+    var a = this.audioBuffers[this.currentBufferId];
+    if (!a || !a.loaded) return false;
+
+    var analyzer = this.analyzer;
+    var analyzerBuf = this.analyzerBuf;
+    var analyzerBuflen = this.analyzerBuflen;
+    var barMargin = 2;
+    var barWidth = 1.0 * this.viz.renderer.width / analyzerBuflen - barMargin;
+    var canvasHeight = this.viz.renderer.height;
+
+    analyzer.getByteFrequencyData(analyzerBuf);
+
+    graphics.beginFill(0xaa4e76);
+    var x = 0;
+    for(var i = 0; i < analyzerBuflen; i++) {
+      var barHeight = getBarHeight(analyzerBuf[i], canvasHeight);
+      var y = canvasHeight - barHeight;
+      graphics.drawRect(x, y, barWidth, barHeight);
+      x += barWidth + barMargin;
+    }
+
+    graphics.endFill();
   };
 
   Audio.prototype.updatePerson = function(person, position, signal){
@@ -105,15 +173,18 @@ var Audio = (function() {
 
     // if no person, play random static
     if (!person) {
+      this.currentBufferId = false;
       this.playStatic();
 
     } else {
+      this.currentBufferId = person.id;
       this.pauseStatic();
       this.playAudio(person, position, signal);
     }
   };
 
   Audio.prototype.updateStatic = function(){
+    this.currentBufferId = false;
     this.pauseAudio();
     this.playStatic();
   };

@@ -107,7 +107,7 @@ body {
 .info {
   display: block;
   width: 90%;
-  height: 5vmin;
+  height: 9.4vmin;
   padding: 1rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.15);
   background: #561e37;
@@ -138,7 +138,7 @@ body {
 .info .label {
   margin-left: 7vmin;
   width: auto;
-  height: 5vmin;
+  height: 10vmin;
 }
 .info .label p {
   white-space: nowrap;
@@ -183,6 +183,12 @@ body {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.station-viz {
+  position: relative;
+  height: 5vmin;
+  width: 100%;
 }
 
 @keyframes marquee {

@@ -58,13 +58,21 @@ var App = (function() {
     var onPlaceChange = function(percent){
       _this.onPlaceChange(percent);
     };
+    var onResize = function(){
+      _this.onResize();
+    };
     this.loadKnobListener("#knob-time-listener", onTimeChange, this.opt.startTime);
     this.loadKnobListener("#knob-place-listener", onPlaceChange, this.opt.startPlace);
+    $(window).on('resize', onResize);
   };
 
   App.prototype.onPlaceChange = function(percent){
     this.place = percent;
     this.update();
+  };
+
+  App.prototype.onResize = function(){
+    this.audio.onResize();
   };
 
   App.prototype.onTimeChange = function(percent){
@@ -125,6 +133,9 @@ var App = (function() {
     }
     // update the knobs always
     this.ui.update(this.time, this.place);
+
+    // update audio viz
+    this.audio.render();
 
     requestAnimationFrame(function(){ _this.render(); });
   };
