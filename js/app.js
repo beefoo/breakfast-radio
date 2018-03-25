@@ -7,6 +7,11 @@ var App = (function() {
     this.init();
   }
 
+  function getPosition(d, time) {
+    var n = norm(time, d.timeStartNormal, d.timeEndNormal);
+    return d.duration * n;
+  }
+
   function getSignal(d, time, place) {
     var timeSignal = 1.0 - Math.abs((norm(time, d.timeSignalStartNormal, d.timeSignalEndNormal) * 2) - 1);
     var placeSignal = 1.0 - Math.abs((norm(place, d.placeSignalStartNormal, d.placeSignalEndNormal) * 2) - 1);
@@ -129,7 +134,14 @@ var App = (function() {
     this.time = newTime;
     var timeChanged = this.updateTime();
     if (timeChanged) {
-      this.updatePerson();
+      var personChanged = this.updatePerson();
+      if (personChanged && this.currentPerson) {
+        this.audio.updatePerson(this.currentPerson, getPosition(this.currentPerson, this.time));
+
+      } else if (personChanged) {
+        this.audio.updateStatic();
+      }
+
     }
     // update the knobs always
     this.ui.update(this.time, this.place);
@@ -216,8 +228,7 @@ var App = (function() {
     var p = this.currentPerson;
     var position;
     if (p) {
-      var n = norm(this.time, p.timeStartNormal, p.timeEndNormal);
-      position = p.duration * n;
+      position = getPosition(p, this.time);
     }
 
     if (personChanged) {

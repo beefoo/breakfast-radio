@@ -11,9 +11,9 @@ var Audio = (function() {
 
   function getBarHeight(value, canvasHeight) {
     var floorLevel = 0;
-  	var height = Math.max(0, (value - floorLevel));
-  	height = (height / (256 - floorLevel)) * canvasHeight;
-  	return height;
+    var height = Math.max(0, (value - floorLevel));
+    height = (height / (256 - floorLevel)) * canvasHeight;
+    return height;
   }
 
   Audio.prototype.init = function(){
