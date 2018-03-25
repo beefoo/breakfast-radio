@@ -141,7 +141,6 @@ var App = (function() {
       } else if (personChanged) {
         this.audio.updateStatic();
       }
-
     }
     // update the knobs always
     this.ui.update(this.time, this.place);
@@ -225,17 +224,13 @@ var App = (function() {
       personChanged = this.updatePerson();
     }
 
-    var p = this.currentPerson;
-    var position;
-    if (p) {
-      position = getPosition(p, this.time);
-    }
-
-    if (personChanged) {
+    if (personChanged && this.currentPerson) {
+      var position = getPosition(this.currentPerson, this.time);
       this.audio.updatePerson(this.currentPerson, position);
 
     } else if (timeChanged && this.currentPerson) {
       var signal = getSignal(this.currentPerson, this.time, this.place);
+      var position = getPosition(this.currentPerson, this.time);
       this.audio.updatePerson(this.currentPerson, position, signal);
     }
 
