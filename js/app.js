@@ -41,7 +41,7 @@ var App = (function() {
     var index = _.random(sample.length - 1);
     var startingPerson = sample[index];
 
-    this.time = startingPerson.timeStartNormal + (startingPerson.timeEndNormal - startingPerson.timeStartNormal) * 0.1;
+    this.time = startingPerson.timeStartNormal + (startingPerson.timeEndNormal - startingPerson.timeStartNormal) * 0.2;
     this.place = startingPerson.placeSignalStartNormal;
 
     this.currentPersonIndex = startingPerson.index;
