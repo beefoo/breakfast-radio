@@ -3,7 +3,8 @@
 var Audio = (function() {
   function Audio(options) {
     var defaults = {
-      el: "#station-viz"
+      el: "#station-viz",
+      barCount: 64
     };
     this.opt = $.extend({}, defaults, options);
     this.init();
@@ -28,8 +29,10 @@ var Audio = (function() {
   };
 
   Audio.prototype.loadAnalyzer = function(){
+    var barCount = this.opt.barCount;
     var analyzer = Pizzicato.context.createAnalyser();
-    analyzer.fftSize = 128;
+
+    analyzer.fftSize = barCount * 4;
     var bufferLength = analyzer.frequencyBinCount;
     var dataArray = new Uint8Array(bufferLength);
 
@@ -147,18 +150,19 @@ var Audio = (function() {
     var a = this.audioBuffers[this.currentBufferId];
     if (!a || !a.loaded) return false;
 
+    var barCount = this.opt.barCount;
     var analyzer = this.analyzer;
     var analyzerBuf = this.analyzerBuf;
     var analyzerBuflen = this.analyzerBuflen;
     var barMargin = 2;
-    var barWidth = 1.0 * this.viz.renderer.width / analyzerBuflen - barMargin;
+    var barWidth = 1.0 * this.viz.renderer.width / barCount - barMargin;
     var canvasHeight = this.viz.renderer.height;
 
     analyzer.getByteFrequencyData(analyzerBuf);
 
     graphics.beginFill(0xaa4e76);
     var x = 0;
-    for(var i = 0; i < analyzerBuflen; i++) {
+    for(var i = 0; i < barCount; i++) {
       var barHeight = getBarHeight(analyzerBuf[i], canvasHeight);
       var y = canvasHeight - barHeight;
       graphics.drawRect(x, y, barWidth, barHeight);

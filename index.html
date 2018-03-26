@@ -35,17 +35,23 @@
     <div class="text-container">
       <div>
         <div class="info">
-          <div class="signal"><div id="signal-status" class="signal-status"></div></div>
-          <div class="label">
-            <div><span id="station-time">--:--</span> <span id="station-zone"></span></div>
-            <div id="station-label" class="station-marquee">
-              <div>
-                <span class="station-label-text">No signal</span>
-                <span class="station-label-text">No signal</span>
-              </div>
-            </div>
-            <div id="station-viz" class="station-viz"></div>
+          <div class="station-status">
+            <div class="signal"><div id="signal-status" class="signal-status"></div></div>
+            <div class="label"><span id="station-time">--:--</span> <span id="station-zone"></span></div>
           </div>
+          <div id="station-label" class="station-marquee">
+            <div>
+              <span class="station-label-text">No signal</span>
+              <span class="station-label-text">No signal</span>
+            </div>
+          </div>
+          <div id="station-viz" class="station-viz"></div>
+          <div class="station-buttons">
+            <button>◀<span class="hidden">Seek left</span></button>
+            <span>Seek</span>
+            <button>▶<span class="hidden">Seek right</span></button>
+          </div>
+
         </div>
         <h1>The Breakfast Frequency</h1>
         <p>
