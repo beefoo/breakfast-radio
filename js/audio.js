@@ -102,6 +102,7 @@ var Audio = (function() {
     var bufferIds = _.keys(this.audioBuffers);
     var bufferId = person.id;
     var bufferIndex = bufferIds.indexOf(bufferId);
+    var $document = $(document);
 
     // play audio buffer
     var playAudioBuffer = function(a){
@@ -123,6 +124,7 @@ var Audio = (function() {
       var buf = new Pizzicato.Sound(person.filename, function() {
         console.log(person.filename + " loaded.");
         _this.audioBuffers[bufferId].loaded = true;
+        $(document).trigger("audio.loaded", [person]);
         playAudioBuffer(_this.audioBuffers[bufferId]);
       });
       buf.connect(this.analyzer);

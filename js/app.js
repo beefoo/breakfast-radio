@@ -66,9 +66,14 @@ var App = (function() {
     var onResize = function(){
       _this.onResize();
     };
+    var onAudioLoad = function(e, person) {
+      _this.ui.onAudioLoad(person);
+    };
+
     this.loadKnobListener("#knob-time-listener", onTimeChange, this.opt.startTime);
     this.loadKnobListener("#knob-place-listener", onPlaceChange, this.opt.startPlace);
     $(window).on('resize', onResize);
+    $(document).on("audio.loaded", onAudioLoad);
   };
 
   App.prototype.onPlaceChange = function(percent){

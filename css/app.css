@@ -245,4 +245,7 @@ body {
     overflow: visible;
     height: auto;
   }
+  .info {
+    width: 100%;
+  }
 }
