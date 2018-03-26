@@ -21,12 +21,12 @@ var App = (function() {
   App.prototype.init = function(){
     var _this = this;
 
-    this.time = this.opt.startTime;
-    this.place = this.opt.startPlace;
     this.timeStep = 1.0 / (this.opt.maxTime - this.opt.minTime);
     this.lastUpdated = new Date();
 
     this.data = this.parseData(MANIFEST.slice(0));
+
+    this.initTimeSpace();
 
     this.ui = new UI({});
     this.audio = new Audio({});
@@ -34,6 +34,17 @@ var App = (function() {
     this.loadListeners();
 
     this.render();
+  };
+
+  App.prototype.initTimeSpace = function(){
+    var sample = _.filter(this.data, function(d){ return d.zone === -5 && d.hour < 10 && d.hour > 7; });
+    var index = _.random(sample.length - 1);
+    var startingPerson = sample[index];
+
+    this.time = startingPerson.timeStartNormal + (startingPerson.timeEndNormal - startingPerson.timeStartNormal) * 0.1;
+    this.place = startingPerson.placeSignalStartNormal;
+
+    this.currentPersonIndex = startingPerson.index;
   };
 
   App.prototype.loadKnobListener = function(knobListenerId, callback, startValue){
@@ -66,14 +77,20 @@ var App = (function() {
     var onResize = function(){
       _this.onResize();
     };
+    var onSeek = function(e) {
+      var direction = 1;
+      if ($(e.target).hasClass("prev")) direction = -1;
+      _this.onSeek(direction);
+    };
     var onAudioLoad = function(e, person) {
       _this.ui.onAudioLoad(person);
     };
 
-    this.loadKnobListener("#knob-time-listener", onTimeChange, this.opt.startTime);
-    this.loadKnobListener("#knob-place-listener", onPlaceChange, this.opt.startPlace);
+    this.loadKnobListener("#knob-time-listener", onTimeChange, this.time);
+    this.loadKnobListener("#knob-place-listener", onPlaceChange, this.place);
     $(window).on('resize', onResize);
     $(document).on("audio.loaded", onAudioLoad);
+    $('.seek').on('click', onSeek)
   };
 
   App.prototype.onPlaceChange = function(percent){
@@ -83,6 +100,10 @@ var App = (function() {
 
   App.prototype.onResize = function(){
     this.audio.onResize();
+  };
+
+  App.prototype.onSeek = function(direction){
+
   };
 
   App.prototype.onTimeChange = function(percent){

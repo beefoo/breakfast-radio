@@ -1,12 +1,11 @@
 var CONFIG = {
   "knobSensitivity": 0.5, // higher = more sensitive
-  "startTime": 0.75, // 9 a.m
-  "startPlace": 0.25, // nyc
   "audioDir": "audio/",
   "minTime": 0,
   "maxTime": 43200, // noon = 12 * 60 * 60 = 43200
   "timePad": 0, // in seconds
-  "placePad": 20 // in degrees longitude (15 deg per timezone)
+  "placePad": 20, // in degrees longitude (15 deg per timezone)
+  "seekMs": 1000
 };
 
 var TIMEZONES = [

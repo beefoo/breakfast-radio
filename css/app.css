@@ -220,6 +220,9 @@ body {
   height: 1.6rem;
   line-height: 1.6rem;
 }
+.station-buttons button:focus {
+  outline: 2px solid #aa4e76;
+}
 
 @keyframes marquee {
   0% { left: 0; }
