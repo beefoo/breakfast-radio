@@ -141,6 +141,7 @@ body {
   background: #00ff60;
   opacity: 0;
   border-radius: 50%;
+  transition: opacity 0.5s;
 }
 .station-status .label {
   display: inline-block;

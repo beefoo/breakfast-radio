@@ -41,8 +41,8 @@ var App = (function() {
     var index = _.random(sample.length - 1);
     var startingPerson = sample[index];
 
-    this.time = startingPerson.timeStartNormal + (startingPerson.timeEndNormal - startingPerson.timeStartNormal) * 0.2;
-    this.place = startingPerson.placeSignalStartNormal;
+    this.time = startingPerson.timeCenterNormal;
+    this.place = startingPerson.timezoneNormal;
 
     this.currentPersonIndex = startingPerson.index;
   };
@@ -58,9 +58,11 @@ var App = (function() {
     var knobRegion = new ZingTouch.Region(knobListener);
     var knobAngle = startValue * 360;
     var onKnobRotate = function(e){
-      knobAngle += e.detail.distanceFromLast * knobSensitivity;
-      knobAngle = clamp(knobAngle, 0, 360);
-      callback(knobAngle/360.0);
+      if (!_this.seeking) {
+        knobAngle += e.detail.distanceFromLast * knobSensitivity;
+        knobAngle = clamp(knobAngle, 0, 360);
+        callback(knobAngle/360.0);
+      }
     };
     knobRegion.bind(knobListener, 'rotate', onKnobRotate);
     callback(startValue);
@@ -103,7 +105,26 @@ var App = (function() {
   };
 
   App.prototype.onSeek = function(direction){
+    if (this.seeking) return false;
 
+    var now = new Date();
+    this.seeking = true;
+    this.seekStart = now.getTime();
+    this.seekEnd = this.seekStart + this.opt.seekMs;
+
+    this.seekFromTime = this.time;
+    this.seekFromPlace = this.place;
+
+    // select next station
+    var dataLen = this.data.length;
+    var nextIndex = this.currentPersonIndex + direction;
+    if (nextIndex < 0) nextIndex = dataLen - 1;
+    if (nextIndex >= dataLen) nextIndex = 0;
+    var nextStation = this.data[nextIndex];
+
+    this.currentPersonIndex = nextIndex;
+    this.seekToTime = nextStation.timeCenterNormal;
+    this.seekToPlace = nextStation.timezoneNormal;
   };
 
   App.prototype.onTimeChange = function(percent){
@@ -130,11 +151,13 @@ var App = (function() {
       }
       d.timeStartNormal = norm(d.timeStart, minTime, maxTime);
       d.timeEndNormal = norm(d.timeEnd, minTime, maxTime);
+      d.timeCenterNormal = d.timeStartNormal + (d.timeEndNormal-d.timeStartNormal) * 0.5;
       d.timeSignalStartNormal = norm(d.timeStart-timePad, minTime, maxTime);
       d.timeSignalEndNormal = norm(d.timeEnd+timePad, minTime, maxTime);
 
       var zone = d.zone+11;
       d.timezone = TIMEZONES[zone];
+      d.timezoneNormal = zone/24;
       d.placeNormal = norm(d.lon, -180.0, 180.0);
       d.placeSignalStartNormal = norm(d.lon-placePad, -180.0, 180.0);
       d.placeSignalEndNormal = norm(d.lon+placePad, -180.0, 180.0);
@@ -144,32 +167,41 @@ var App = (function() {
       return d;
     });
 
-    return parsedData;
+    var sortedData = _.sortBy(parsedData, function(d){
+      return d.timeCenterNormal + d.zone;
+    });
+
+    return sortedData;
   };
 
   App.prototype.render = function(){
     var _this = this;
-
-    // increment time
     var now = new Date();
-    var deltaSeconds = (now - this.lastUpdated) / 1000.0;
-    var deltaPercent = deltaSeconds * this.timeStep;
-    var newTime = clamp(this.time + deltaPercent, 0, 1);
-    this.lastUpdated = now;
+    now = now.getTime();
 
-    this.time = newTime;
-    var timeChanged = this.updateTime();
-    if (timeChanged) {
-      var personChanged = this.updatePerson();
-      if (personChanged && this.currentPerson) {
-        this.audio.updatePerson(this.currentPerson, getPosition(this.currentPerson, this.time));
+    // we are seeking
+    if (this.seeking) {
+      var progress = norm(now, this.seekStart, this.seekEnd);
 
-      } else if (personChanged) {
-        this.audio.updateStatic();
+      // done seeking
+      if (progress >= 1) {
+        progress = 1.0;
+        this.seeking = false;
       }
+
+      this.time = lerp(this.seekFromTime, this.seekToTime, progress);
+      this.place = lerp(this.seekFromPlace, this.seekToPlace, progress);
+      this.update();
+
+    // else just increment time
+    } else {
+      var deltaSeconds = (now - this.lastUpdated) / 1000.0;
+      var deltaPercent = deltaSeconds * this.timeStep;
+      var newTime = clamp(this.time + deltaPercent, 0, 1);
+      this.lastUpdated = now;
+      this.time = newTime;
+      this.update(true);
     }
-    // update the knobs always
-    this.ui.update(this.time, this.place);
 
     // update audio viz
     this.audio.render();
@@ -241,7 +273,7 @@ var App = (function() {
     return changed;
   };
 
-  App.prototype.update = function(){
+  App.prototype.update = function(isAuto){
     var timeChanged = this.updateTime();
     var zoneChanged = this.updateZone();
     var personChanged = false;
@@ -250,17 +282,18 @@ var App = (function() {
       personChanged = this.updatePerson();
     }
 
-    if (personChanged && this.currentPerson) {
+    if (personChanged && this.currentPerson
+        && (!this.seeking || this.seeking && this.currentPerson.index===this.currentPersonIndex)) {
       var position = getPosition(this.currentPerson, this.time);
       this.audio.updatePerson(this.currentPerson, position);
 
-    } else if (timeChanged && this.currentPerson) {
+    } else if (!isAuto && timeChanged && this.currentPerson) {
       var signal = getSignal(this.currentPerson, this.time, this.place);
       var position = getPosition(this.currentPerson, this.time);
       this.audio.updatePerson(this.currentPerson, position, signal);
     }
 
-    if (!this.currentPerson) {
+    if ((personChanged || !isAuto) && !this.currentPerson) {
       this.audio.updateStatic();
     }
 
