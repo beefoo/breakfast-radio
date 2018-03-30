@@ -144,6 +144,26 @@ var Audio = (function() {
     this.radioStatic.play();
   };
 
+  Audio.prototype.preload = function(person){
+    var _this = this;
+    var bufferId = person.id;
+    var bufferIds = _.keys(this.audioBuffers);
+    var bufferIndex = bufferIds.indexOf(bufferId);
+
+    if (bufferIndex < 0) {
+      var buf = new Pizzicato.Sound(person.filename, function() {
+        console.log(person.filename + " pre-loaded.");
+        _this.audioBuffers[bufferId].loaded = true;
+      });
+      buf.connect(this.analyzer);
+      this.audioBuffers[bufferId] = {
+        buf: buf,
+        loaded: false,
+        playing: false
+      };
+    }
+  };
+
   Audio.prototype.render = function(){
     var graphics = this.graphics;
     graphics.clear();

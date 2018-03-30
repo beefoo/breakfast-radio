@@ -297,6 +297,19 @@ var App = (function() {
       this.audio.updateStatic();
     }
 
+    // pre-load person before and after
+    if (personChanged && this.currentPerson) {
+      var data = this.data;
+      var len = data.length;
+      var after = this.currentPerson.index + 1;
+      var before = this.currentPerson.index - 1;
+      if (after >= len) after = 0;
+      if (before < 0) before = len - 1;
+      this.audio.preload(data[after]);
+      this.audio.preload(data[before]);
+    }
+
+
     // update the knobs always
     this.ui.update(this.time, this.place);
   };
