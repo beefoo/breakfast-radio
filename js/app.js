@@ -141,8 +141,7 @@ var App = (function() {
 
     var parsedData = _.map(data, function(obj, i){
       var d = _.clone(obj);
-      d.id = ""+i;
-      d.index = i;
+
       d.timeStart = d.hour * 60 * 60 + d.minute * 60;
       d.timeEnd = d.timeStart + d.duration;
       if (d.timeEnd > maxTime) {
@@ -171,7 +170,14 @@ var App = (function() {
       return d.timeCenterNormal + d.zone;
     });
 
-    return sortedData;
+    var indexedData = _.map(sortedData, function(obj, i){
+      var d = _.clone(obj);
+      d.id = ""+i;
+      d.index = i;
+      return d;
+    });
+
+    return indexedData;
   };
 
   App.prototype.render = function(){
@@ -308,7 +314,6 @@ var App = (function() {
       this.audio.preload(data[after]);
       this.audio.preload(data[before]);
     }
-
 
     // update the knobs always
     this.ui.update(this.time, this.place);

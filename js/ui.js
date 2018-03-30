@@ -54,20 +54,22 @@ var UI = (function() {
 
   UI.prototype.updatePerson = function(person){
     if (person) {
-      var id = person.id;
-      var index = this.peopleIds.indexOf(id);
-
-      if (index >= 0) {
-        this.$stationMarqueeText.text("Now playing: "+person.label);
-        this.$stationSignal.css('opacity', 1);
-
-      // audio not loaded yet
-      } else {
-        this.$stationMarqueeText.text("Acquiring signal: "+person.label);
-        this.$stationSignal.css('opacity', 0.5);
-      }
-
+      this.$stationMarqueeText.text("Now playing: "+person.label);
       this.$stationMarquee.addClass("active");
+      this.$stationSignal.css('opacity', 1);
+
+      // var id = person.id;
+      // var index = this.peopleIds.indexOf(id);
+      //
+      // if (index >= 0) {
+      //   this.$stationMarqueeText.text("Now playing: "+person.label);
+      //   this.$stationSignal.css('opacity', 1);
+      //
+      // // audio not loaded yet
+      // } else {
+      //   this.$stationMarqueeText.text("Acquiring signal: "+person.label);
+      //   this.$stationSignal.css('opacity', 0.5);
+      // }
 
     } else {
       this.$stationMarqueeText.text("No signal");

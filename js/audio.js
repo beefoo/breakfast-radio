@@ -94,7 +94,9 @@ var Audio = (function() {
     this.playStatic(0);
   };
 
-  Audio.prototype.playAudio = function(person, position, signal){
+  Audio.prototype.playAudio = function(person, position, signal, playing){
+    if (playing !== false) playing = true;
+
     var _this = this;
 
     // retrieve existing buffer
@@ -102,7 +104,6 @@ var Audio = (function() {
     var bufferIds = _.keys(this.audioBuffers);
     var bufferId = person.id;
     var bufferIndex = bufferIds.indexOf(bufferId);
-    var $document = $(document);
 
     // play audio buffer
     var playAudioBuffer = function(a){
@@ -114,7 +115,7 @@ var Audio = (function() {
 
     // play existing audio buffer
     if (bufferIndex >= 0) {
-      this.audioBuffers[bufferId].playing = true;
+      this.audioBuffers[bufferId].playing = playing;
       this.audioBuffers[bufferId].signal = signal;
       this.audioBuffers[bufferId].position = position;
       playAudioBuffer(this.audioBuffers[bufferId]);
@@ -124,14 +125,14 @@ var Audio = (function() {
       var buf = new Pizzicato.Sound(person.filename, function() {
         console.log(person.filename + " loaded.");
         _this.audioBuffers[bufferId].loaded = true;
-        $(document).trigger("audio.loaded", [person]);
+        // $(document).trigger("audio.loaded", [person]);
         playAudioBuffer(_this.audioBuffers[bufferId]);
       });
       buf.connect(this.analyzer);
       this.audioBuffers[bufferId] = {
         buf: buf,
         loaded: false,
-        playing: true,
+        playing: playing,
         signal: signal,
         position: position
       };
@@ -145,23 +146,7 @@ var Audio = (function() {
   };
 
   Audio.prototype.preload = function(person){
-    var _this = this;
-    var bufferId = person.id;
-    var bufferIds = _.keys(this.audioBuffers);
-    var bufferIndex = bufferIds.indexOf(bufferId);
-
-    if (bufferIndex < 0) {
-      var buf = new Pizzicato.Sound(person.filename, function() {
-        console.log(person.filename + " pre-loaded.");
-        _this.audioBuffers[bufferId].loaded = true;
-      });
-      buf.connect(this.analyzer);
-      this.audioBuffers[bufferId] = {
-        buf: buf,
-        loaded: false,
-        playing: false
-      };
-    }
+    this.playAudio(person, 0, 0, false);
   };
 
   Audio.prototype.render = function(){
