@@ -110,6 +110,7 @@ var App = (function() {
     var knobRegion = new ZingTouch.Region(knobListener);
     var knobAngle = startValue * 360;
     var onKnobRotate = function(e){
+      e.preventDefault();
       if (!_this.seeking) {
         knobAngle += e.detail.distanceFromLast * knobSensitivity;
         knobAngle = clamp(knobAngle, 0, 360);
