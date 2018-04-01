@@ -167,7 +167,7 @@ var Audio = (function() {
 
     analyzer.getByteFrequencyData(analyzerBuf);
 
-    graphics.beginFill(0xaa4e76);
+    graphics.beginFill(0xB53471);
     var x = 0;
     for(var i = 0; i < barCount; i++) {
       var barHeight = getBarHeight(analyzerBuf[i], canvasHeight);
