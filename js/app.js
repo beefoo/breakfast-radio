@@ -7,6 +7,35 @@ var App = (function() {
     this.init();
   }
 
+  function findPerson(data, time, place) {
+    var match = false;
+
+    var matches = _.filter(data, function(d){
+      return (time >= d.timeSignalStartNormal && time <= d.timeSignalEndNormal && place >= d.placeSignalStartNormal && place < d.placeSignalEndNormal);
+    });
+
+    // add signal strength
+    // signal strength of 1 = place and time are exactly in the center of audio track
+    // signal strength of 0 = place and time are at the very edges of audio track
+    matches = _.map(matches, function(m){
+      var d = _.clone(m);
+      d.signal = getSignal(d, time, place);
+      return d;
+    });
+
+    // more than one matched, take the one with the strongest signal
+    if (matches.length > 1) {
+      var sorted = _.sortBy(matches, function(d){ return 1.0 - d.signal; });
+      match = sorted[0];
+
+    // only one matched
+    } else if (matches.length > 0) {
+      match = matches[0];
+    }
+
+    return match;
+  }
+
   function getPosition(d, time) {
     var n = norm(time, d.timeStartNormal, d.timeEndNormal);
     return d.duration * n;
@@ -37,6 +66,29 @@ var App = (function() {
   };
 
   App.prototype.initTimeSpace = function(){
+    var minTime = this.opt.minTime;
+    var maxTime = this.opt.maxTime;
+
+    // set the radio to the current time if we can find a match
+    var now = new Date();
+    var timezone = now.getTimezoneOffset() / -60;
+    if (timezone===-4) timezone = -5; // hack
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var seconds = hours * 60 * 60 + minutes * 60;
+    var timeNormal = norm(seconds, minTime, maxTime);
+    var placeNormal = (timezone + 11) / 24;
+    var match = findPerson(this.data, timeNormal, placeNormal);
+
+    // match found
+    if (match) {
+      this.time = timeNormal;
+      this.place = placeNormal;
+      this.currentPersonIndex = match.index;
+      return;
+    }
+
+    // otherwise, choose a random person
     var sample = _.filter(this.data, function(d){ return d.zone === -5 && d.hour < 10 && d.hour > 7; });
     var index = _.random(sample.length - 1);
     var startingPerson = sample[index];
@@ -80,6 +132,7 @@ var App = (function() {
       _this.onResize();
     };
     var onSeek = function(e) {
+      e.preventDefault();
       var direction = 1;
       if ($(e.target).hasClass("prev")) direction = -1;
       _this.onSeek(direction);
@@ -216,32 +269,7 @@ var App = (function() {
   };
 
   App.prototype.updatePerson = function(){
-    var place = this.place;
-    var time = this.time;
-    var match = false;
-
-    var matches = _.filter(this.data, function(d){
-      return (time >= d.timeSignalStartNormal && time <= d.timeSignalEndNormal && place >= d.placeSignalStartNormal && place < d.placeSignalEndNormal);
-    });
-
-    // add signal strength
-    // signal strength of 1 = place and time are exactly in the center of audio track
-    // signal strength of 0 = place and time are at the very edges of audio track
-    matches = _.map(matches, function(m){
-      var d = _.clone(m);
-      d.signal = getSignal(d, time, place);
-      return d;
-    });
-
-    // more than one matched, take the one with the strongest signal
-    if (matches.length > 1) {
-      var sorted = _.sortBy(matches, function(d){ return 1.0 - d.signal; });
-      match = sorted[0];
-
-    // only one matched
-    } else if (matches.length > 0) {
-      match = matches[0];
-    }
+    var match = findPerson(this.data, this.time, this.place);
 
     // check to see if the person is changed
     var prev = this.currentPerson;
