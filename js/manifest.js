@@ -168,5 +168,15 @@ var MANIFEST = [
     "lon": 2.6116906, 
     "minute": 31, 
     "zone": 1
+  }, 
+  {
+    "duration": 1402.5224, 
+    "filename": "ay.mp3", 
+    "hour": 8, 
+    "label": "A. Y. in Singapore", 
+    "lat": 1.3568787, 
+    "lon": 103.7733999, 
+    "minute": 0, 
+    "zone": 8
   }
 ];
