@@ -105,12 +105,11 @@ var App = (function() {
 
     // listen to knob
     var $knobListener = $(knobListenerId);
-    var $knob = $($knobListener.attr("data-target"));
     var knobListener = $knobListener[0];
     var knobRegion = new ZingTouch.Region(knobListener);
     var knobAngle = startValue * 360;
     var onKnobRotate = function(e){
-      e.preventDefault();
+      // console.log(e)
       if (!_this.seeking) {
         knobAngle += e.detail.distanceFromLast * knobSensitivity;
         knobAngle = clamp(knobAngle, 0, 360);
