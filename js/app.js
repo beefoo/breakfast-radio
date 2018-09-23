@@ -60,9 +60,14 @@ var App = (function() {
     this.ui = new UI({});
     this.audio = new Audio({});
 
-    this.loadListeners();
+    // wait for a click to start things (to comply with browser audio autoplay policy)
+    $(".start-app").on("click", function(e){
+      $(".instructions-container").removeClass("active");
+      _this.loadListeners();
+      _this.render();
+    });
 
-    this.render();
+
   };
 
   App.prototype.initTimeSpace = function(){
