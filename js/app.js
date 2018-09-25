@@ -57,11 +57,12 @@ var App = (function() {
 
     this.initTimeSpace();
     this.ui = new UI({});
+    this.audio = new Audio({});
 
     // wait for a click to start things (to comply with browser audio autoplay policy)
     $(".start-app").on("click", function(e){
       $(".instructions-container").removeClass("active");
-      _this.audio = new Audio({});
+      Pizzicato.context.resume();
       _this.loadListeners();
       _this.render();
     });
