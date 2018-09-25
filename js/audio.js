@@ -118,6 +118,7 @@ var Audio = (function() {
       this.audioBuffers[bufferId].playing = playing;
       this.audioBuffers[bufferId].signal = signal;
       this.audioBuffers[bufferId].position = position;
+      // $(document).trigger("audio.loaded", [person]);
       playAudioBuffer(this.audioBuffers[bufferId]);
 
     // load and play new audio buffer
